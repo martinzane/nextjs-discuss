@@ -14,7 +14,6 @@ export default async function Home() {
       <form action={actions.signOut}>
         <Button type="submit">Sign out</Button>
       </form>
-
       <Profile />
     </div>
   );
