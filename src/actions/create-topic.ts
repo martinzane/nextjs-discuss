@@ -2,6 +2,11 @@
 
 import auth from "@/auth";
 import { z } from "zod";
+import type { Topic } from "@prisma/client";
+import db from "@/db";
+import { redirect } from "next/navigation";
+import paths from "@/paths";
+import { revalidatePath } from "next/cache";
 
 const schema = z.object({
   name: z
@@ -31,6 +36,12 @@ export async function createTopic(
     description: formData.get("description"),
   });
 
+  if (!result.success) {
+    return {
+      errors: result.error.flatten().fieldErrors,
+    };
+  }
+
   const session = await auth.session();
   if (!session || !session.user) {
     return {
@@ -39,15 +50,32 @@ export async function createTopic(
       },
     };
   }
-  if (!result.success) {
-    return {
-      errors: result.error.flatten().fieldErrors,
-    };
+
+  let topic: Topic;
+
+  try {
+    topic = await db.topic.create({
+      data: {
+        slug: result.data.name,
+        description: result.data.description,
+      },
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return {
+        errors: {
+          _form: [error.message],
+        },
+      };
+    } else {
+      return {
+        errors: {
+          _form: ["Something went wrong."],
+        },
+      };
+    }
   }
 
-  return {
-    errors: {},
-  };
-
-  // TODO: Revalidate home page
+  revalidatePath("/");
+  redirect(paths.topic(topic.slug));
 }
