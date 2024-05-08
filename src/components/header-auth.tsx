@@ -8,7 +8,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@nextui-org/react";
-import * as actions from "@/actions";
+import actions from "@/actions";
 import { useSession } from "next-auth/react";
 
 export default function HeaderAuth() {
