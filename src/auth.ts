@@ -35,7 +35,7 @@ const auth = {
   POST: nextAuth.handlers.POST,
   signIn: nextAuth.signIn,
   signOut: nextAuth.signOut,
-  auth: nextAuth.auth,
+  session: nextAuth.auth,
 };
 
 export default auth;
