@@ -1,5 +1,6 @@
 import Link from "next/link";
 import paths from "@/paths";
+import PostShow from "@/components/posts/show";
 
 interface PostShowPageProps {
   params: {
@@ -8,7 +9,7 @@ interface PostShowPageProps {
   };
 }
 
-export default async function PostShowPage({ params }: PostShowPageProps) {
+export default async function PostPage({ params }: PostShowPageProps) {
   const { slug, id } = params;
 
   return (
@@ -16,6 +17,7 @@ export default async function PostShowPage({ params }: PostShowPageProps) {
       <Link className="underline decoration-solid" href={paths.topic(slug)}>
         {"< "}Back to {slug}
       </Link>
+      <PostShow id={id} />
     </div>
   );
 }
