@@ -1,5 +1,7 @@
 import db from "@/db";
 import { notFound } from "next/navigation";
+import CommentList from "../comments/list";
+import { fetchCommentsByPostId } from "@/db/queries/comments";
 
 interface PostShowProps {
   id: string;
