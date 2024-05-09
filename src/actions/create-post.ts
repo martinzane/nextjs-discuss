@@ -2,7 +2,7 @@
 
 import auth from "@/auth";
 import { z } from "zod";
-import type { Topic } from "@prisma/client";
+import type { Post, Topic } from "@prisma/client";
 import db from "@/db";
 import { redirect } from "next/navigation";
 import paths from "@/paths";
@@ -22,6 +22,7 @@ interface CreatePostFormState {
 }
 
 export async function createPost(
+  slug: string,
   formState: CreatePostFormState,
   formData: FormData
 ): Promise<CreatePostFormState> {
@@ -29,8 +30,6 @@ export async function createPost(
     title: formData.get("title"),
     content: formData.get("content"),
   });
-
-  console.log(result.success);
 
   if (!result.success) {
     return {
@@ -47,6 +46,44 @@ export async function createPost(
     };
   }
 
-  return { errors: {} };
-  // TODO: Revalidate topic page
+  const topic = await db.topic.findFirst({
+    where: { slug },
+  });
+
+  if (!topic) {
+    return {
+      errors: {
+        _form: ["Cannot find topic."],
+      },
+    };
+  }
+
+  let post: Post;
+  try {
+    post = await db.post.create({
+      data: {
+        title: result.data.title,
+        content: result.data.content,
+        userId: session.user.id,
+        topicId: topic.id,
+      },
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return {
+        errors: {
+          _form: [error.message],
+        },
+      };
+    } else {
+      return {
+        errors: {
+          _form: ["Something went wrong."],
+        },
+      };
+    }
+  }
+
+  revalidatePath(paths.topic(slug));
+  redirect(paths.post(slug, post.id));
 }
